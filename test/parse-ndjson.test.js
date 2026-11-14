@@ -92,7 +92,31 @@ test("testmd overall_status wins over an earlier passing run_end", () => {
   assert.equal(parsed.result_code, 720);
   assert.equal(parsed.reason_code, "assertion_error.checkpoint_failed");
   assert.equal(parsed.video_trace, "https://test-manager.lambdatest.com/share/TESTMD_FIXTURE_DIRECTION");
+  assert.equal(parsed.test_url, parsed.video_trace);
+  assert.equal(parsed.run_dir, null);
   assert.equal(parsed.checks.length, 1);
+});
+
+test("real testmd captures sum step credits and use the share URL", () => {
+  const cases = [
+    ["real-arabic-toggle.ndjson", 13.839324999999999 + 17.861935],
+    ["real-check-document.ndjson", 16.6019625 + 16.0869625],
+    ["real-open-checklist.ndjson", 10.37407 + 16.970405],
+  ];
+  for (const [name, credits] of cases) {
+    const parsed = parseKaneNdjson(fs.readFileSync(path.join(fixtures, name), "utf8"));
+    assert.equal(parsed.surface, "testmd", name);
+    assert.equal(parsed.verdict, "passed", name);
+    assert.equal(parsed.cli_version, "0.10.4", name);
+    assert.ok(Math.abs(parsed.credits_consumed - credits) < 1e-9, `${name} credits ${parsed.credits_consumed}`);
+    assert.ok(parsed.share_url.startsWith("https://test-manager.lambdatest.com/"), name);
+    assert.equal(parsed.test_url, parsed.share_url, name);
+    assert.equal(parsed.video_trace, parsed.share_url, name);
+    assert.equal(parsed.run_dir, null, name);
+    assert.match(parsed.evidence_pack, /\.evidence$/, name);
+    assert.match(parsed.session_dir, /\/sessions\/[0-9a-f-]+$/, name);
+    assert.ok(parsed.checks.length >= 2, name);
+  }
 });
 
 test("process exit code wins when it disagrees with the stream", () => {

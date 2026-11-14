@@ -54,9 +54,7 @@ export async function main(argv) {
   };
 
   if (command === "run") {
-    const result = await executeRun(common);
-    process.stdout.write(`${result.mdPath}\n`);
-    return result.exitCode;
+    return runCommand(common, args);
   }
   if (command === "serve") {
     const started = await startServer({ root: path.join(root, "app"), port: common.port ?? 4173 });
@@ -99,9 +97,7 @@ export async function main(argv) {
       return 0;
     }
     if (action === "run") {
-      const result = await executeRun(common);
-      process.stdout.write(`${result.mdPath}\n`);
-      return result.exitCode;
+      return runCommand(common, args);
     }
     process.stderr.write("Use: satr-verify hook install | uninstall | run\n");
     return 2;
@@ -123,11 +119,30 @@ export async function main(argv) {
   return 2;
 }
 
+async function runCommand(common, args) {
+  let server;
+  try {
+    if (args.serve) {
+      server = await startServer({
+        root: path.join(common.root, "app"),
+        port: common.port ?? 4173,
+      });
+      common.url = server.url.replace(/\/$/, "");
+      process.stderr.write(`satr-verify: serving ${server.url}\n`);
+    }
+    const result = await executeRun(common);
+    process.stdout.write(`${result.mdPath}\n`);
+    return result.exitCode;
+  } finally {
+    if (server) await server.close();
+  }
+}
+
 function helpText() {
   return `satr-verify — run Kane CLI against the Satr paperwork helper and write .satr/last-run.md
 
 Usage
-  satr-verify run [--url URL] [--flow FILE] [--dry-run] [--fixture NDJSON]
+  satr-verify run [--url URL] [--serve] [--flow FILE] [--dry-run] [--fixture NDJSON]
   satr-verify serve [--port 4173]
   satr-verify watch [--url URL] [--dry-run]
   satr-verify hook install

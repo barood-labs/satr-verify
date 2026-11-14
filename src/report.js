@@ -98,7 +98,6 @@ export function formatReport(report) {
     lines.push("");
     if (flow.evidence_pack) lines.push(`Evidence pack: \`${flow.evidence_pack}\``);
     if (flow.session_dir) lines.push(`Session directory: \`${flow.session_dir}\``);
-    if (flow.run_dir) lines.push(`Run directory: \`${flow.run_dir}\``);
     if (flow.test_url && flow.test_url !== flow.video_trace) lines.push(`Test Manager: ${flow.test_url}`);
     if (flow.recording?.session_id) {
       lines.push(`Recording: ${flow.recording.enabled ? "on" : "off"}, session ${flow.recording.session_id}`);
