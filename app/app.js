@@ -34,6 +34,12 @@ export function loadLang() {
   }
 }
 
+export function taskMatches(task, query, lang) {
+  const needle = String(query ?? "").trim().toLowerCase();
+  if (!needle) return true;
+  return String(task[lang].title).toLowerCase().includes(needle);
+}
+
 export function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -45,6 +51,7 @@ export function escapeHtml(value) {
 const state = {
   lang: "en",
   checks: {},
+  query: "",
 };
 
 function text() {
@@ -90,13 +97,17 @@ function render() {
   bind(view, task);
 }
 
-function renderList() {
+function visibleTasks() {
+  return TASKS.filter((task) => taskMatches(task, state.query, state.lang));
+}
+
+function renderCard(task) {
   const copy = text();
-  const cards = TASKS.map((task, index) => {
-    const item = task[state.lang];
-    return `<li>
+  const item = task[state.lang];
+  const index = TASKS.indexOf(task) + 1;
+  return `<li>
       <button type="button" class="task" data-open="${task.id}">
-        <span class="index">${index + 1}</span>
+        <span class="index">${index}</span>
         <span>
           <strong>${escapeHtml(item.title)}</strong>
           <small>${escapeHtml(item.summary)}</small>
@@ -104,12 +115,21 @@ function renderList() {
         <span class="go">${escapeHtml(copy.open)}</span>
       </button>
     </li>`;
-  }).join("");
+}
+
+function renderList() {
+  const copy = text();
+  const tasks = visibleTasks();
   return `<section class="hero">
     <h1>${escapeHtml(copy.headline)}</h1>
     <p class="deck">${escapeHtml(copy.deck)}</p>
     <p class="ready-line">${escapeHtml(copy.ready(totalChecked()))}</p>
-    <ul class="tasks">${cards}</ul>
+    <div class="search-row">
+      <label for="task-search">${escapeHtml(copy.searchLabel)}</label>
+      <input id="task-search" type="text" value="${escapeHtml(state.query)}" autocomplete="off" enterkeyhint="search" />
+    </div>
+    <p class="search-empty"${tasks.length ? " hidden" : ""}>${escapeHtml(copy.searchEmpty)}</p>
+    <ul class="tasks">${tasks.map(renderCard).join("")}</ul>
   </section>`;
 }
 
@@ -163,11 +183,24 @@ function renderDetail(task) {
   </article>`;
 }
 
-function bind(view, task) {
+function bindTaskButtons(view) {
   view.querySelectorAll("[data-open]").forEach((button) => {
     button.addEventListener("click", () => {
       location.hash = button.getAttribute("data-open");
     });
+  });
+}
+
+function bind(view, task) {
+  bindTaskButtons(view);
+  const search = view.querySelector("#task-search");
+  search?.addEventListener("input", () => {
+    state.query = search.value;
+    const tasks = visibleTasks();
+    view.querySelector(".tasks").innerHTML = tasks.map(renderCard).join("");
+    const empty = view.querySelector(".search-empty");
+    if (empty) empty.hidden = tasks.length > 0;
+    bindTaskButtons(view);
   });
   const back = view.querySelector("#back");
   if (back) {
