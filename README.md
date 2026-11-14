@@ -1,12 +1,12 @@
 # Satr Verify
 
-Satr is a bilingual Arabic and English checklist for people new to the United States: pick a task such as a state ID, a bank account, a Social Security card, school enrollment, or a low-cost clinic, see the documents and the order, and tick them off on your own device. Satr Verify is the closed loop around it. Plain-English flows in `flows/` run through Kane CLI, and the NDJSON comes back as `.satr/last-run.md`: which step failed, what was expected, what the page actually showed, and a link or path to the video trace. An agent reads that report, patches `app/`, and runs Kane again until the verdict is passed.
+Satr is a bilingual Arabic and English paperwork checklist for people new to the United States: a state ID, a bank account, a Social Security card, school, or a clinic, with the documents, the order, and a search box that filters the list in both languages. A Cursor cloud agent built the page and Satr Verify. Kane CLI runs the plain-English flows in a real browser and writes `.satr/last-run.md` — the failed step, expected versus actual, and the video trace — and the agent patches the page and runs Kane again until the verdict is passed.
+
+The search flow was committed before the search box existed. At 17:06 UTC Kane returned result 740, `assertion_error.confirmed_product_bug`: no Search tasks field ([red trace](https://test-manager.lambdatest.com/projects/01M7DEFKES5QP35A9974V05XNA/test-cases/01M7DGB5AXB13QPW2TSZTZKGBQ/dashboard/share/US_A4WXV0FGC8AWAGA1VC41DXDTWR9TFWDWVMLUOB21MS3T1ELPO7VRNTGC9A0H0ENC?type=summary&agentView=true&fqdn=summary-page), `docs/loop/01-red.md`). The agent read that report, added the field, and did not edit `flows/`. At 17:10 UTC the same flow passed, result 100, `success.complete`, in English and Arabic ([green trace](https://test-manager.lambdatest.com/projects/01M7DEFKES5QP35A9974V05XNA/test-cases/01M7DGGB8BBTAN52NPC358Z4RN/dashboard/share/US_JB7RTH13S339IYK93EG4IZZ8I1XQR1K2Y6FJCVCDYQHA9RRVD8Y4MYYI4PXCC0K9?type=summary&agentView=true&fqdn=summary-page), `docs/loop/02-green.md`).
 
 **Live app:** https://barood-labs.github.io/satr-verify/
 
-The Pages workflow is on `main` and publishes the `app/` directory. GitHub does not let the Actions token create the site, so a repo admin turns it on once: [Settings → Pages](https://github.com/barood-labs/satr-verify/settings/pages), set **Source** to **GitHub Actions**, then re-run the `pages` workflow. Until that switch is on, the URL returns 404.
-
-Built for the [Kane CLI Online Hackathon](https://luma.com/kanecli-online-hackathon). The agent in this repo is Cursor. Kane CLI is the verifier.
+Built for the [Kane CLI Online Hackathon](https://luma.com/kanecli-online-hackathon).
 
 ## 30-second setup
 
@@ -110,6 +110,7 @@ node --test
 - `flows/open-checklist_test.md` — the name Satr, the task "Get a state ID", the document "Proof of identity", and a step about booking an appointment.
 - `flows/arabic-toggle_test.md` — the button "العربية", then the title "استخراج بطاقة هوية الولاية" and the phrase "من اليمين إلى اليسار".
 - `flows/check-document_test.md` — "Open a bank account", the document "Government photo ID", and progress text that shows "1 of" after the checkbox.
+- `flows/search-tasks_test.md` — a field labeled "Search tasks"; "Social" leaves the Social Security card and hides the bank account; after العربية the label is "ابحث عن مهمة", and "عيادة" leaves the clinic and hides the bank account.
 
 Only the active language is in the DOM, so the Arabic assertions are about text a visitor can see.
 
@@ -121,9 +122,9 @@ flows/        Kane _test.md files
 src/          parser, report, Kane runner, watch, hook, MCP
 bin/satr-verify.js
 test/         parser fixtures and unit tests
-docs/DEMO.md
+docs/DEMO.md      2:45 shot list for the real red → green search loop
+docs/loop/       the Kane reports from that loop
+docs/SUBMISSION.md
 ```
 
-## Submission paragraph
-
-Satr Verify is a bilingual paperwork checklist for newcomers in the United States, and a small CLI that closes the loop between a coding agent and Kane CLI. The agent edits the static page; `satr-verify` runs the plain-English flows with `kane-cli --agent`, parses the NDJSON, and writes the failed step, expected versus actual, and the video trace to `.satr/last-run.md`. The agent reads that file, patches the page, and runs again until the verdict is passed. The same tool is a pre-push hook, a save watcher, and an MCP tool named `verify_with_kane`. The Pages workflow on main publishes `app/` to https://barood-labs.github.io/satr-verify/ after a repo admin sets the source to GitHub Actions. The agent was Cursor.
+The paragraph for the hackathon form is in `docs/SUBMISSION.md`.

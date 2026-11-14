@@ -1,79 +1,88 @@
-# Three-minute demo
+# Demo shot list — 2:45
 
-Film the screen. Talk over it. Judges stop at 3:00, so the red report is the first frame. Set the video to Unlisted.
+Screen-record on Linux. Judges stop at 3:00, so this cut ends at 2:45. Do not re-run Kane on camera: the 17:10 pass took 93 seconds. Open the saved reports and the share pages. No fixtures.
 
-This script is the closed loop: a failed Kane run, the agent reading it, a patch in `app/`, then the same command going green. Two ways to shoot it:
-
-- **Live.** On a machine with Kane CLI signed in, use the commands in the README. The report lands in `.satr/last-run.md`. If the first run fails, the middle of this script is the real patch. If it passes, the green half is the proof, and you can still open with the rehearsal failure below so the loop is visible.
-- **Rehearsal, no credits.** The failure fixture uses the same `run_end` fields as kane-cli 0.10.4 (`result_code`, `reason_code`, `context.memory.expected_value` / `extracted_value`, `test_url`, `coverage.pack`). Say on camera that this file is a captured-shape failure, and that a credited run writes the same report.
-
-## 0:00 — The failure (20 seconds)
-
-Terminal, large type. Run:
+Start the recording, then follow the shots in order. Each shot has the command to type and the caption to leave on screen. A caption is one line in the terminal, printed with `echo`, large enough to read.
 
 ```bash
-node bin/satr-verify.js run \
-  --fixture test/fixtures/arabic-heading-mismatch.ndjson \
-  --flow arabic-toggle_test.md \
-  --url https://barood-labs.github.io/satr-verify/
+ffmpeg -y \
+  -f x11grab -video_size 1920x1080 -framerate 30 -i "$DISPLAY" \
+  -f pulse -i default \
+  -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac \
+  -t 165 ~/satr-verify-demo.mp4
 ```
 
-Leave `.satr/last-run.md` on screen. Read only these lines:
+Drop `-f pulse -i default -c:a aac` if the box has no PulseAudio. Use the desktop size you actually have if it is not 1920x1080. Set the finished file to Unlisted before you submit it.
 
-- Verdict: **failed**
-- Result code 710, `assertion_error.final_verification`
-- Failed step 4
-- Expected: استخراج بطاقة هوية الولاية
-- Actual: Get a state ID
-- Video trace: the Test Manager share URL
+Work from a checkout of `main` after the search loop is merged, so `docs/loop/` is present.
 
-Say: "Kane opened the page, clicked العربية, and the state ID title was still English. The agent does not get a screenshot dump. It gets this."
+## 0:00–0:20 — Red Kane result
 
-## 0:20 — The agent acts (50 seconds)
-
-Open `.satr/last-run.md` beside `app/app.js`. Point at `applyLanguage` and at `task[state.lang].title` in `renderList`. The spec at the bottom of the report is `flows/arabic-toggle_test.md`. Say that the flow stays; the page changes.
-
-Show the instruction block "What the agent should do": patch `app/`, do not weaken `flows/`, run again.
-
-If you are shooting a real Kane failure, make the edit now and save. On the rehearsal, do not fake a diff. Say: "The page already renders that Arabic title. A live failure would be a diff in this function, then the same command without `--fixture`."
-
-Optional, if the pre-push hook is the thing you want in frame:
+Terminal, full screen, large type.
 
 ```bash
-node bin/satr-verify.js hook install
+clear
+echo "CAPTION: Kane, 17:06 UTC. Result 740. No Search tasks field."
+sed -n '7,29p' docs/loop/01-red.md
 ```
 
-One sentence: "The next `git push` runs the same flows and blocks on a failed verdict."
+Leave the reason on screen: `No Search tasks field exists in the current page snapshot.`
 
-## 1:10 — Green (40 seconds)
-
-Rehearsal, the captured passing run (real kane-cli 0.10.4 NDJSON, example.com, result code 100):
+## 0:20–0:45 — The agent reads the report
 
 ```bash
-node bin/satr-verify.js run \
-  --fixture test/fixtures/warmup.ndjson \
-  --url https://example.com
+clear
+echo "CAPTION: The agent reads .satr/last-run.md. It patches app/. The flow stays."
+sed -n '42,56p' docs/loop/01-red.md
 ```
 
-Live, after the patch:
+The block on screen is the spec Kane kept and the line that says to patch `app/` and not edit `flows/`.
+
+## 0:45–1:15 — The diff
 
 ```bash
-node bin/satr-verify.js run --url https://barood-labs.github.io/satr-verify/
+clear
+echo "CAPTION: Fix commit. Search field added. flows/search-tasks_test.md is not in this diff."
+git show 8030a6c --stat
+echo
+git show 8030a6c -- app/tasks.js | sed -n '1,80p'
 ```
 
-Show the new verdict: **passed**, `success.complete`, credits, and the video trace link. Open the trace if it is a real share URL. Say: "Same file. The agent stops here."
+Point at `searchLabel: "Search tasks"` and `searchLabel: "ابحث عن مهمة"`.
 
-## 1:50 — The app (70 seconds)
+## 1:15–1:55 — Green Kane run
 
-Browser, https://barood-labs.github.io/satr-verify/ (or `node bin/satr-verify.js serve`).
+```bash
+clear
+echo "CAPTION: Same command, 17:10 UTC. Exit 0. Result 100. 93s. English and Arabic passed."
+echo 'node bin/satr-verify.js run --serve --flow search-tasks_test.md'
+echo
+sed -n '7,39p' docs/loop/02-green.md
+```
 
-1. Home, English. Five tasks. Open **Get a state ID**. Show Proof of identity and the appointment step.
-2. Tick **Proof of identity**. The line becomes "1 of 4 documents".
-3. Click **العربية**. The header says "الاتجاه: من اليمين إلى اليسار". The title is "استخراج بطاقة هوية الولاية". The margin moves to the right. Point at the sentence under "ماذا تقول".
-4. Click **English**. You are back.
+Then open the green share page in the browser and leave it up for the rest of this shot:
 
-End on the URL and one sentence: "Satr is the checklist. Satr Verify is the loop that makes an agent prove it."
+https://test-manager.lambdatest.com/projects/01M7DEFKES5QP35A9974V05XNA/test-cases/01M7DGGB8BBTAN52NPC358Z4RN/dashboard/share/US_JB7RTH13S339IYK93EG4IZZ8I1XQR1K2Y6FJCVCDYQHA9RRVD8Y4MYYI4PXCC0K9?type=summary&agentView=true&fqdn=summary-page
 
-## If you only have one take
+The red share page, if you have a second tab ready and a spare second:
 
-Keep 0:00 and 1:10. Cut the hook. The app tour can lose the checkbox if you are over time. Do not cut the expected-versus-actual lines.
+https://test-manager.lambdatest.com/projects/01M7DEFKES5QP35A9974V05XNA/test-cases/01M7DGB5AXB13QPW2TSZTZKGBQ/dashboard/share/US_A4WXV0FGC8AWAGA1VC41DXDTWR9TFWDWVMLUOB21MS3T1ELPO7VRNTGC9A0H0ENC?type=summary&agentView=true&fqdn=summary-page
+
+## 1:55–2:45 — Live site, Arabic
+
+In a second terminal, before this shot if you want the server already up:
+
+```bash
+node bin/satr-verify.js serve
+```
+
+Browser: https://barood-labs.github.io/satr-verify/ if that deploy already has the search field. If the Pages copy is still the older build, use http://127.0.0.1:4173/ from the command above.
+
+1. Click **العربية**.
+2. Click the field labeled **ابحث عن مهمة**.
+3. Type `عيادة`.
+4. Leave the screen on **إيجاد عيادة منخفضة التكلفة**. **فتح حساب بنكي** is gone. The margin is on the right.
+
+Caption, typed in the terminal you are not filming, or as a browser bookmark title you do not need to show: `Arabic. Search عيادة. The clinic stays. The bank account is gone.`
+
+Stop the recording at 2:45. Do not add a fixture run after this.
