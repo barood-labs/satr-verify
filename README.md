@@ -4,6 +4,8 @@ Satr is a bilingual Arabic and English checklist for people new to the United St
 
 **Live app:** https://barood-labs.github.io/satr-verify/
 
+The Pages workflow is on `main` and publishes the `app/` directory. GitHub does not let the Actions token create the site, so a repo admin turns it on once: [Settings → Pages](https://github.com/barood-labs/satr-verify/settings/pages), set **Source** to **GitHub Actions**, then re-run the `pages` workflow. Until that switch is on, the URL returns 404.
+
 Built for the [Kane CLI Online Hackathon](https://luma.com/kanecli-online-hackathon). The agent in this repo is Cursor. Kane CLI is the verifier.
 
 ## 30-second setup
@@ -118,4 +120,4 @@ docs/DEMO.md
 
 ## Submission paragraph
 
-Satr Verify is a bilingual paperwork checklist for newcomers in the United States, and a small CLI that closes the loop between a coding agent and Kane CLI. The agent edits the static page; `satr-verify` runs the plain-English flows with `kane-cli --agent`, parses the NDJSON, and writes the failed step, expected versus actual, and the video trace to `.satr/last-run.md`. The agent reads that file, patches the page, and runs again until the verdict is passed. The same tool is a pre-push hook, a save watcher, and an MCP tool named `verify_with_kane`. The page is live at https://barood-labs.github.io/satr-verify/. The agent was Cursor.
+Satr Verify is a bilingual paperwork checklist for newcomers in the United States, and a small CLI that closes the loop between a coding agent and Kane CLI. The agent edits the static page; `satr-verify` runs the plain-English flows with `kane-cli --agent`, parses the NDJSON, and writes the failed step, expected versus actual, and the video trace to `.satr/last-run.md`. The agent reads that file, patches the page, and runs again until the verdict is passed. The same tool is a pre-push hook, a save watcher, and an MCP tool named `verify_with_kane`. The Pages workflow on main publishes `app/` to https://barood-labs.github.io/satr-verify/ after a repo admin sets the source to GitHub Actions. The agent was Cursor.
