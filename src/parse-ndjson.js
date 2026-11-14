@@ -67,9 +67,13 @@ export function parseKaneNdjson(stdout, { stderr = "" } = {}) {
   const reasonCode = primaryRunEnd?.reason_code ?? primaryRunEnd?.per_flow_metadata?.[0]?.reason_code ?? null;
   const derived = deriveVerdict({ status, resultCode, reasonCode, completion, errors, events });
 
-  const testUrl = primaryRunEnd?.test_url ?? null;
   const shareUrl = testMdDone?.share_url ?? testrunDone?.share_url ?? null;
-  const videoTrace = firstTrace(testUrl, shareUrl, evidencePack, primaryRunEnd?.session_dir ?? null);
+  // testmd 0.10.4 puts the share link on test_md_done, not on run_end.
+  const testUrl = primaryRunEnd?.test_url ?? shareUrl ?? null;
+  const sessionDir = primaryRunEnd?.session_dir ?? null;
+  // testmd run_dir is only the last step's runs/N folder, and Kane does not keep it.
+  const runDir = surface === "testmd" ? null : (primaryRunEnd?.run_dir ?? null);
+  const videoTrace = firstTrace(testUrl, shareUrl, evidencePack, sessionDir);
 
   return {
     events,
@@ -88,10 +92,10 @@ export function parseKaneNdjson(stdout, { stderr = "" } = {}) {
     summary: primaryRunEnd?.summary ?? null,
     one_liner: primaryRunEnd?.one_liner ?? null,
     duration_s: durationOf(completion, primaryRunEnd),
-    credits_consumed: creditsOf(primaryRunEnd),
+    credits_consumed: creditsOf(runEnds),
     final_state: primaryRunEnd?.final_state ?? {},
-    session_dir: primaryRunEnd?.session_dir ?? null,
-    run_dir: primaryRunEnd?.run_dir ?? null,
+    session_dir: sessionDir,
+    run_dir: runDir,
     run_id: primaryRunEnd?.run_id ?? null,
     test_url: testUrl,
     share_url: shareUrl,
@@ -176,11 +180,16 @@ function durationOf(completion, runEnd) {
   return null;
 }
 
-function creditsOf(runEnd) {
-  if (!runEnd) return null;
-  if (runEnd.credits_consumed != null) return runEnd.credits_consumed;
-  if (runEnd.credits != null) return runEnd.credits;
-  return null;
+function creditsOf(runEnds) {
+  const amounts = [];
+  for (const runEnd of runEnds) {
+    const value = runEnd?.credits_consumed ?? runEnd?.credits;
+    if (value == null || value === "") continue;
+    const number = Number(value);
+    if (Number.isFinite(number)) amounts.push(number);
+  }
+  if (!amounts.length) return null;
+  return amounts.reduce((sum, amount) => sum + amount, 0);
 }
 
 function normalizeResultCode(value) {

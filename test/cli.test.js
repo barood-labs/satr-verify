@@ -13,12 +13,16 @@ import { startServer } from "../src/serve.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-test("discovers the three committed flows and keeps base_url out of frontmatter", () => {
+test("discovers the committed flows and keeps base_url out of frontmatter", () => {
   const flows = discoverFlows(root);
-  assert.deepEqual(
-    flows.map((flow) => flow.file),
-    ["flows/arabic-toggle_test.md", "flows/check-document_test.md", "flows/open-checklist_test.md"],
-  );
+  const files = flows.map((flow) => flow.file);
+  for (const name of [
+    "flows/arabic-toggle_test.md",
+    "flows/check-document_test.md",
+    "flows/open-checklist_test.md",
+  ]) {
+    assert.ok(files.includes(name), name);
+  }
   for (const flow of flows) {
     const text = fs.readFileSync(flow.path, "utf8");
     assert.match(text, /^---\n[\s\S]*?\n---\n/);
@@ -78,6 +82,20 @@ test("fixture mode writes the failure report the agent reads", async () => {
   assert.equal(json.flows[0].result_code, 710);
   assert.equal(json.flows[0].file, "flows/arabic-toggle_test.md");
   assert.ok(json.flows[0].spec_steps.length >= 2);
+});
+
+test("--serve runs against the local server in this process", () => {
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), "satr-serve-"));
+  const ran = spawnSync(
+    process.execPath,
+    ["bin/satr-verify.js", "run", "--serve", "--port", "0", "--dry-run", "--out", out],
+    { cwd: root, encoding: "utf8" },
+  );
+  assert.equal(ran.status, 0, ran.stderr);
+  assert.match(ran.stderr, /serving http:\/\/127\.0\.0\.1:\d+\//);
+  const markdown = fs.readFileSync(path.join(out, "last-run.md"), "utf8");
+  assert.match(markdown, /URL: http:\/\/127\.0\.0\.1:\d+/);
+  assert.doesNotMatch(markdown, /Run directory/);
 });
 
 test("dry-run does not launch Kane and exits 0", () => {

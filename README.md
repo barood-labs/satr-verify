@@ -75,6 +75,12 @@ Then, from this repo:
 node bin/satr-verify.js run --url https://barood-labs.github.io/satr-verify/
 ```
 
+To check a branch before it is deployed, start the checklist and point Kane at that process:
+
+```bash
+node bin/satr-verify.js run --serve
+```
+
 One flow, if you want a shorter first run:
 
 ```bash
