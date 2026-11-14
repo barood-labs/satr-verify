@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Satr — paperwork, one line at a time</title>
+    <meta
+      name="description"
+      content="Satr is a bilingual Arabic and English checklist for newcomers in the United States. Pick a task, see the documents, and keep your place."
+    />
+    <meta name="theme-color" content="#f3ecdf" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%231e2a24'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='%23f3ecdf' font-family='serif'%3Eس%3C/text%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,680&family=Noto+Naskh+Arabic:wght@500;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script>
+      try {
+        if (localStorage.getItem("satr-papers-lang") === "ar") {
+          document.documentElement.lang = "ar";
+          document.documentElement.dir = "rtl";
+        }
+      } catch (error) {}
+    </script>
+  </head>
+  <body>
+    <a class="skip" id="skip" href="#main">Skip to the checklist</a>
+    <header class="mast">
+      <div class="brand">
+        <span class="seal" aria-hidden="true">سطر</span>
+        <div>
+          <p class="wordmark">Satr <span lang="ar">سطر</span></p>
+          <p class="kicker" id="kicker">Newcomer paperwork</p>
+        </div>
+      </div>
+      <button type="button" class="lang" id="lang-toggle" aria-pressed="false">العربية</button>
+    </header>
+    <main id="main">
+      <p class="direction" id="direction">Direction: left to right</p>
+      <noscript>
+        <p>Satr needs JavaScript to switch language and save your checks. The page is still a static file.</p>
+      </noscript>
+      <div id="view"></div>
+    </main>
+    <footer class="colophon">
+      <p id="disclaimer">
+        A practical checklist, not legal advice. Rules change by state. Confirm the official source before your appointment.
+      </p>
+    </footer>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

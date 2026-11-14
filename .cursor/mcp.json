@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "satr-verify": {
+      "command": "node",
+      "args": ["bin/satr-verify.js", "mcp"]
+    }
+  }
+}

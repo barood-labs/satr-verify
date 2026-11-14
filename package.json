@@ -1,0 +1,21 @@
+{
+  "name": "satr-verify",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Closed loop between an AI coding agent and Kane CLI. Verifies the Satr newcomer paperwork helper.",
+  "type": "module",
+  "bin": {
+    "satr-verify": "./bin/satr-verify.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test",
+    "start": "node ./bin/satr-verify.js serve",
+    "verify": "node ./bin/satr-verify.js run --dry-run",
+    "demo:fail": "node ./bin/satr-verify.js run --fixture test/fixtures/arabic-heading-mismatch.ndjson --url https://barood-labs.github.io/satr-verify/",
+    "demo:pass": "node ./bin/satr-verify.js run --fixture test/fixtures/warmup.ndjson --url https://example.com"
+  },
+  "license": "MIT"
+}
