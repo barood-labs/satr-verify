@@ -1,0 +1,2 @@
+{"type":"stream_start","cli_version":"0.10.4","surface":"run","pid":7,"v":1,"ts":"2026-11-14T17:06:00.000Z"}
+{"type":"error","message":"Not signed in. Run kane-cli login --oauth, or pass --username and --access-key.","code":"auth","v":1,"ts":"2026-11-14T17:06:00.200Z"}

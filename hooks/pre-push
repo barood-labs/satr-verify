@@ -1,0 +1,12 @@
+#!/bin/sh
+# Installed by `satr-verify hook install`. Blocks the push when Kane reports a failure.
+cd "$(git rev-parse --show-toplevel)" || exit 2
+if [ -n "$SATR_VERIFY_SKIP" ]; then
+  echo "satr-verify: pre-push skipped (SATR_VERIFY_SKIP is set)"
+  exit 0
+fi
+extra=""
+if [ "$SATR_VERIFY_DRY_RUN" = "1" ]; then
+  extra="--dry-run"
+fi
+exec node bin/satr-verify.js run $extra

@@ -1,0 +1,11 @@
+node_modules/
+.satr/
+.testmuai/
+output-*/
+helper-output-*/
+*.evidence
+.DS_Store
+*.log
+secrets/
+.env
+.env.*
