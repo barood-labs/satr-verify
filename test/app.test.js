@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { TASKS, UI } from "../app/tasks.js";
-import { escapeHtml, progressLabel } from "../app/app.js";
+import { escapeHtml, progressLabel, taskMatches } from "../app/app.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -28,6 +28,18 @@ test("every task has the same shape in Arabic and English", () => {
   assert.equal(UI.ar.direction, "الاتجاه: من اليمين إلى اليسار");
   assert.equal(UI.en.langButton, "العربية");
   assert.equal(UI.ar.langButton, "English");
+  assert.equal(UI.en.searchLabel, "Search tasks");
+  assert.equal(UI.ar.searchLabel, "ابحث عن مهمة");
+});
+
+test("search filters task titles in both languages", () => {
+  const social = TASKS.filter((task) => taskMatches(task, "Social", "en")).map((task) => task.id);
+  assert.deepEqual(social, ["ssn"]);
+  const clinic = TASKS.filter((task) => taskMatches(task, "عيادة", "ar")).map((task) => task.id);
+  assert.deepEqual(clinic, ["clinic"]);
+  assert.equal(taskMatches(TASKS.find((task) => task.id === "bank"), "Social", "en"), false);
+  assert.equal(taskMatches(TASKS.find((task) => task.id === "bank"), "عيادة", "ar"), false);
+  assert.equal(TASKS.filter((task) => taskMatches(task, "  ", "en")).length, TASKS.length);
 });
 
 test("the strings Kane looks for are present in only one language", () => {
